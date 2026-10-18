@@ -1,0 +1,197 @@
+{
+  "info": {
+    "name": "Daily Global Tech News Scheduler",
+    "description": "Read requests and a manual GNews collection action for the project API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "article_id",
+      "value": "REPLACE_WITH_MONGODB_OBJECT_ID"
+    },
+    {
+      "key": "briefing_date",
+      "value": "2026-10-18"
+    }
+  ],
+  "item": [
+    {
+      "name": "Get Scheduler Settings",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/scheduler"
+      }
+    },
+    {
+      "name": "Set Scheduler to 1 Day",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"interval_minutes\": 1440\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{base_url}}/scheduler"
+      }
+    },
+    {
+      "name": "Collect Latest from GNews",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/collect"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.expect(pm.response.json().fetched).to.be.a('number');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.expect(pm.response.json().status).to.eql('ok');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Latest News",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/news?limit=10"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.expect(pm.response.json()).to.be.an('array');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "News by ID",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/news/{{article_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.expect(pm.response.json()._id).to.be.a('string');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "News by Category",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/news/category/Quantum%20Computing"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.expect(pm.response.json()).to.be.an('array');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search News",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/news/search?keyword=python"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.expect(pm.response.json()).to.be.an('array');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Briefing History",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/briefings?limit=10"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.expect(pm.response.json()).to.be.an('array');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Briefing by Date",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/briefings/{{briefing_date}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "pm.expect(pm.response.json().briefing_date).to.eql(pm.collectionVariables.get('briefing_date'));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
